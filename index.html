@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout de Logística - Esteira em L</title>
+    <style>
+        :root {
+            --bg-color: #f7f9fc;
+            --belt-color: #2b2f3a;
+            --package-color: #c88a4e;
+            --primary-color: #0d6efd;
+            --danger-color: #dc3545;
+            --success-color: #198754;
+            --secondary-color: #6c757d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #ffffff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h1 { font-size: 22px; margin: 0; color: #1a202c; }
+
+        .controls { display: flex; gap: 10px; }
+
+        button {
+            padding: 10px 18px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        button:hover { opacity: 0.9; }
+        button.secondary { background-color: var(--secondary-color); }
+        button.add-btn { background-color: var(--success-color); }
+
+        #canvas-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            height: 800px;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        #canvas {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .movable {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+        }
+
+        .movable:active { cursor: grabbing; }
+
+        .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background-color: var(--danger-color);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            line-height: 1;
+            padding: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 50;
+        }
+
+        .movable:hover .delete-btn { display: flex; }
+
+        /* Esteira L Contínua */
+        .belt-section {
+            background-color: var(--belt-color);
+            box-sizing: border-box;
+            position: absolute;
+        }
+
+        .belt-horizontal {
+            width: 700px;
+            height: 100px;
+            border-top: 6px solid #4a5568;
+            border-bottom: 6px solid #4a5568;
+            background-image: repeating-linear-gradient(90deg, #374151 0px, #374151 15px, #1f2937 15px, #1f2937 20px);
+        }
+
+        .belt-corner {
+            width: 100px;
+            height: 100px;
+            background: #2b2f3a;
+            border-top: 6px solid #4a5568;
+            border-right: 6px solid #4a5568;
+            border-radius: 0 20px 0 0;
+        }
+
+        .belt-vertical {
+            width: 100px;
+            height: 480px;
+            border-left: 6px solid #4a5568;
+            border-right: 6px solid #4a5568;
+            background-image: repeating-linear-gradient(0deg, #374151 0px, #374151 15px, #1f2937 15px, #1f2937 20px);
+        }
+
+        /* Pacotes em animação */
+        .package {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: var(--package-color);
+            border: 2px solid #94602f;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 8px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        @keyframes moveH {
+            0% { transform: translateX(-40px); opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { transform: translateX(660px); opacity: 0; }
+        }
+
+        @keyframes moveV {
+            0% { transform: translateY(-40px); opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { transform: translateY(440px); opacity: 0; }
+        }
+
+        .pkg-h { animation: moveH 8s linear infinite; top: 35px; }
+        .pkg-v { animation: moveV 6s linear infinite; left: 35px; }
+
+        /* Gaiolas */
+        .cage {
+            width: 78px;
+            height: 52px;
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .cage-base {
+            font-size: 9px;
+            font-weight: 700;
+            color: #1a202c;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .cage-seg {
+            font-size: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            background: rgba(0,0,0,0.03);
+            padding: 1px 3px;
+            border-radius: 3px;
+            margin-top: 1px;
+            max-width: 72px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .color-picker {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            padding: 0;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .cage:hover .color-picker { opacity: 1; }
+
+        /* Colaboradores */
+        .worker {
+            width: 68px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .worker-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .worker-role {
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            background-color: var(--primary-color);
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-top: 3px;
+        }
+
+        .worker-name {
+            font-size: 9px;
+            font-weight: 600;
+            color: #2d3748;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-top: 1px;
+            max-width: 66px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        [contenteditable="true"] { outline: none; }
+        [contenteditable="true"]:focus {
+            outline: 1px solid var(--primary-color);
+            background: rgba(13,110,253,0.05);
+            border-radius: 2px;
+        }
+
+        @media print {
+            body { padding: 0; background: #fff; }
+            header, .delete-btn, .color-picker { display: none !important; }
+            #canvas-wrapper { border: none; box-shadow: none; height: auto; overflow: visible; width: 100%; }
+            .package { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Layout Logístico - Esteira em L</h1>
+        </div>
+        <div class="controls">
+            <button onclick="window.print()">Imprimir / PDF</button>
+            <button class="add-btn" onclick="addWorker()">+ Colaborador</button>
+            <button class="add-btn" onclick="addCage()">+ Gaiola</button>
+            <button class="secondary" onclick="resetLayout()">Restaurar Original</button>
+        </div>
+    </header>
+
+    <div id="canvas-wrapper">
+        <div id="canvas">
+            
+            <!-- Esteira em L Contínua -->
+            <div id="belt-h" class="movable belt-section belt-horizontal" style="top: 250px; left: 150px;">
+                <div class="package pkg-h" style="animation-delay: 0s;">ML</div>
+                <div class="package pkg-h" style="animation-delay: 2.6s;">SHP</div>
+                <div class="package pkg-h" style="animation-delay: 5.3s;">TTK</div>
+            </div>
+
+            <div id="belt-c" class="movable belt-section belt-corner" style="top: 250px; left: 850px;"></div>
+
+            <div id="belt-v" class="movable belt-section belt-vertical" style="top: 350px; left: 850px;">
+                <div class="package pkg-v" style="animation-delay: 0s;">ML</div>
+                <div class="package pkg-v" style="animation-delay: 2s;">SHP</div>
+                <div class="package pkg-v" style="animation-delay: 4s;">TTK</div>
+            </div>
+
+            <!-- Colaboradores Iniciais -->
+            <div id="worker-1" class="movable worker" style="top: 140px; left: 220px;">
+                <button class="delete-btn" onclick="removeEl('worker-1')">×</button>
+                <div class="worker-avatar">👩</div>
+                <div class="worker-role" contenteditable="true">F1</div>
+                <div class="worker-name" contenteditable="true">Operador 1</div>
+            </div>
+
+            <div id="worker-2" class="movable worker" style="top: 140px; left: 420px;">
+                <button class="delete-btn" onclick="removeEl('worker-2')">×</button>
+                <div class="worker-avatar">🧑</div>
+                <div class="worker-role" contenteditable="true">F2</div>
+                <div class="worker-name" contenteditable="true">Operador 2</div>
+            </div>
+
+            <div id="worker-3" class="movable worker" style="top: 140px; left: 620px;">
+                <button class="delete-btn" onclick="removeEl('worker-3')">×</button>
+                <div class="worker-avatar">👨</div>
+                <div class="worker-role" contenteditable="true">F3</div>
+                <div class="worker-name" contenteditable="true">Operador 3</div>
+            </div>
+
+             <div id="worker-4" class="movable worker" style="top: 380px; left: 980px;">
+                <button class="delete-btn" onclick="removeEl('worker-4')">×</button>
+                <div class="worker-avatar">👩</div>
+                <div class="worker-role" contenteditable="true">F4</div>
+                <div class="worker-name" contenteditable="true">Operador 4</div>
+            </div>
+
+            <div id="worker-5" class="movable worker" style="top: 540px; left: 980px;">
+                <button class="delete-btn" onclick="removeEl('worker-5')">×</button>
+                <div class="worker-avatar">🧑</div>
+                <div class="worker-role" contenteditable="true">F5</div>
+                <div class="worker-name" contenteditable="true">Operador 5</div>
+            </div>
+
+            <div id="worker-6" class="movable worker" style="top: 700px; left: 980px;">
+                <button class="delete-btn" onclick="removeEl('worker-6')">×</button>
+                <div class="worker-avatar">👨</div>
+                <div class="worker-role" contenteditable="true">F6</div>
+                <div class="worker-name" contenteditable="true">Operador 6</div>
+            </div>
+
+            <!-- 37 Gaiolas -->
+            <div id="cages-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const initialCages = [
+            { base: "MDL-PA", seg: "831-00", top: 180, left: 150 },
+            { base: "ATM 02-PA", seg: "837-00", top: 180, left: 235 },
+            { base: "ATM -PA", seg: "719-00", top: 180, left: 320 },
+            { base: "F-ANP-PA", seg: "966-00", top: 180, left: 405 },
+            { base: "F PCA-PA", seg: "730-00", top: 180, left: 490 },
+            { base: "F DOM -PA", seg: "736-00", top: 180, left: 575 },
+            { base: "RON-PA", seg: "759-20", top: 180, left: 660 },
+            { base: "AMP -PA", seg: "724-16", top: 180, left: 745 },
+            { base: "NMB -PA", seg: "724-06", top: 355, left: 150 },
+            { base: "SDA -PA", seg: "724-08", top: 355, left: 235 },
+            { base: "F JCD-PA", seg: "724-12", top: 355, left: 320 },
+            { base: "F TLA-PA", seg: "744-00", top: 355, left: 405 },
+            { base: "F-BBC-PA", seg: "996-00", top: 355, left: 490 },
+            { base: "F TUR-PA", seg: "724-03", top: 355, left: 575 },
+            { base: "TCI-PA", seg: "951-00", top: 355, left: 660 },
+            { base: "F GNS-PA", seg: "750-00", top: 355, left: 745 },
+            { base: "NRE -PA", seg: "735-00", top: 360, left: 790 },
+            { base: "F ITI-PA", seg: "720-00", top: 425, left: 790 },
+            { base: "F NMB-PA", seg: "767-00", top: 490, left: 790 },
+            { base: "CDJ", seg: "775-00", top: 555, left: 790 },
+            { base: "MRB-02", seg: "681-00", top: 620, left: 790 },
+            { base: "BNV-PA", seg: "675-00", top: 685, left: 790 },
+            { base: "F RDC -PA", seg: "724-19", top: 360, left: 960 },
+            { base: "F SFX-PA", seg: "724-20", top: 425, left: 960 },
+            { base: "F ORL-PA", seg: "724-10", top: 490, left: 960 },
+            { base: "F XIG 02-PA", seg: "724-07", top: 555, left: 960 },
+            { base: "F CNA-PA", seg: "740-00", top: 620, left: 960 },
+            { base: "CNA-PA", seg: "691-00", top: 685, left: 960 },
+            { base: "CKS -PA", seg: "724-01", top: 180, left: 850 },
+            { base: "F ELD-PA", seg: "742-00", top: 180, left: 935 },
+            { base: "CDA -PA", seg: "728-00", top: 180, left: 1020 },
+            { base: "AUG -TO", seg: "724-14", top: 265, left: 1020 },
+            { base: "F TCP-TO", seg: "777-00", top: 330, left: 1020 },
+            { base: "F AGT-TO", seg: "767-00", top: 395, left: 1020 },
+            { base: "TCM-PA", seg: "953-00", top: 460, left: 1020 },
+            { base: "SGA-PA", seg: "887-15", top: 525, left: 1020 },
+            { base: "EXTRA-PA", seg: "000-00", top: 590, left: 1020 }
+        ];
+
+        let activeEl = null;
+        let dragOffset = { x: 0, y: 0 };
+        let workerAutoId = 6;
+        let cageAutoId = 37;
+
+        function renderInitialCages() {
+            const container = document.getElementById('cages-container');
+            container.innerHTML = '';
+            initialCages.forEach((c, idx) => {
+                const id = cage-${idx + 1};
+                const div = document.createElement('div');
+                div.id = id;
+                div.className = 'movable cage';
+                div.style.top = ${c.top}px;
+                div.style.left = ${c.left}px;
+                div.innerHTML = `
+                    <button class="delete-btn" onclick="removeEl('${id}')">×</button>
+                    <input type="color" class="color-picker" value="#ffffff" onchange="updateCageColor('${id}', this.value)">
+                    <div class="cage-base" contenteditable="true">${c.base}</div>
+                    <div class="cage-seg" contenteditable="true">${c.seg}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        document.addEventListener('mousedown', (e) => {
+            const target = e.target;
+            if (target.classList.contains('delete-btn') || target.tagName === 'INPUT' || target.getAttribute('contenteditable') === 'true') {
+                return;
+            }
+            const movable = target.closest('.movable');
+            if (movable) {
+                activeEl = movable;
+                const rect = movable.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                movable.style.zIndex = 1000;
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!activeEl) return;
+            const canvasRect = document.getElementById('canvas').getBoundingClientRect();
+            let x = e.clientX - dragOffset.x - canvasRect.left;
+            let y = e.clientY - dragOffset.y - canvasRect.top;
+
+            x = Math.max(0, Math.min(x, canvasRect.width - activeEl.offsetWidth));
+            y = Math.max(0, Math.min(y, canvasRect.height - activeEl.offsetHeight));
+
+            activeEl.style.left = ${x}px;
+            activeEl.style.top = ${y}px;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (activeEl) {
+                activeEl.style.zIndex = activeEl.classList.contains('worker') ? '20' : (activeEl.classList.contains('cage') ? '10' : '');
+                saveState();
+                activeEl = null;
+            }
+        });
+
+        function updateCageColor(id, color) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.backgroundColor = color;
+                saveState();
+            }
+        }
+
+        function removeEl(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.remove();
+                saveState();
+            }
+        }
+
+        function addWorker() {
+            workerAutoId++;
+            const id = worker-${workerAutoId};
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'movable worker';
+            div.style.top = '100px';
+            div.style.left = '100px';
+            div.innerHTML = `
+                <button class="delete-btn" onclick="removeEl('${id}')">×</button>
+                <div class="worker-avatar">👤</div>
+                <div class="worker-role" contenteditable="true">F${workerAutoId}</div>
+                <div class="worker-name" contenteditable="true">Novo Operador</div>
+            `;
+            document.getElementById('canvas').appendChild(div);
+            saveState();
+        }
+
+        function addCage() {
+            cageAutoId++;
+            const id = cage-${cageAutoId};
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'movable cage';
+            div.style.top = '100px';
+            div.style.left = '40px';
+            div.innerHTML = `
+                <button class="delete-btn" onclick="removeEl('${id}')">×</button>
+                <input type="color" class="color-picker" value="#ffffff" onchange="updateCageColor('${id}', this.value)">
+                <div class="cage-base" contenteditable="true">NOVA-BASE</div>
+                <div class="cage-seg" contenteditable="true">000-00</div>
+            `;
+            document.getElementById('canvas').appendChild(div);
+            saveState();
+        }
+
+        function saveState() {
+            const data = [];
+            document.querySelectorAll('.movable').forEach(el => {
+                if (el.id) {
+                    data.push({
+                        id: el.id,
+                        className: el.className,
+                        top: el.style.top,
+                        left: el.style.left,
+                        bgColor: el.style.backgroundColor || '',
+                        innerHTML: el.innerHTML
+                    });
+                }
+            });
+            localStorage.setItem('warehouse_layout_state', JSON.stringify(data));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('warehouse_layout_state');
+            if (!saved) {
+                renderInitialCages();
+                return;
+            }
+            try {
+                const data = JSON.parse(saved);
+                const canvas = document.getElementById('canvas');
+                data.forEach(item => {
+                    let el = document.getElementById(item.id);
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = item.id;
+                        canvas.appendChild(el);
+                    }
+                    el.className = item.className;
+                    el.style.top = item.top;
+                    el.style.left = item.left;
+                    if (item.bgColor) el.style.backgroundColor = item.bgColor;
+                    el.innerHTML = item.innerHTML;
+
+                    const colorInput = el.querySelector('.color-picker');
+                    if (colorInput && item.bgColor) colorInput.value = item.bgColor;
+                });
+            } catch (e) {
+                renderInitialCages();
+            }
+        }
+
+        function resetLayout() {
+            if (confirm('Restaurar o layout padrão?')) {
+                localStorage.removeItem('warehouse_layout_state');
+                location.reload();
+            }
+        }
+
+        document.addEventListener('input', () => saveState());
+        document.addEventListener('DOMContentLoaded', () => loadState());
+    </script>
+</body>
+</html>
