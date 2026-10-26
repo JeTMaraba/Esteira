@@ -151,18 +151,18 @@
   @media print {
     body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .no-print, .delete-btn, .rotate-handle, .color-picker, .package, tr.drop-extra, tr.so-tela, .vaga-txt { display: none !important; }
-    #board-scroll { overflow: visible; padding: 0; }
-    #board { zoom: 0.58; border: none; margin: 0; }
+    #board-scroll { overflow: visible !important; padding: 0; height: auto !important; }
+    #board { zoom: 0.58; border: none; margin: 0; transform: none !important; }
     #canvas-wrapper { overflow: visible; border: none; }
   }
 </style>
 </head>
 <body>
-<div class="max-w-7xl mx-auto p-3">
+<div class="w-full p-3">
 
   <!-- ===== BARRA DE CONTROLE ===== -->
   <div class="no-print bg-white rounded-lg shadow p-3 mb-3 flex flex-wrap gap-3 items-end">
-    <h1 class="text-lg font-bold text-gray-800 mr-2">Painel Diário</h1>
+    <h1 class="text-lg font-bold text-gray-800 mr-2">Painel Diário <span class="text-xs font-normal text-gray-400" title="Se não aparecer esta etiqueta, a página aberta é uma versão antiga do arquivo">v7 · tela responsiva</span></h1>
     <div>
       <label class="block text-xs font-medium text-gray-600">Data</label>
       <input type="date" id="dataEscala" class="border border-gray-300 rounded px-2 py-1" />
@@ -174,6 +174,13 @@
     <button class="btn add" id="btnMaisDiarista" title="Pede um diarista para este dia: ele ocupa uma posição em branco">+ Diarista</button>
     <button class="btn secondary small hidden" id="btnMenosDiarista" title="Dispensa o último diarista pedido">− Diarista</button>
     <span id="badgeDiaristas" class="hidden text-xs font-semibold px-2 py-1 rounded bg-purple-100 text-purple-700"></span>
+    <label class="text-xs text-gray-600 flex items-center gap-1" title="Como o painel se ajusta à janela">Tela
+      <select id="modoZoom" class="border border-gray-300 rounded px-1 py-1 text-xs">
+        <option value="largura">Preencher largura</option>
+        <option value="tela">Caber na tela</option>
+        <option value="100">Tamanho real</option>
+      </select>
+    </label>
     <div>
       <label class="block text-xs font-medium text-gray-600">Equipe / Setor</label>
       <input type="text" id="setor" class="border border-gray-300 rounded px-2 py-1 w-20" value="T1" />
@@ -480,9 +487,32 @@ let observacoes = carregarLS(STORAGE_KEY_OBS, []);
 let posicoesRotativas = carregarLS(STORAGE_KEY_POS, posicoesPadrao);
 let atribuicoesManuais = carregarLS(STORAGE_KEY_ATRIB, []);
 let folgasDomingo = carregarLS(STORAGE_KEY_FOLGA_DOM, []);
-let state = carregarLS(STORAGE_KEY_LAYOUT, defaultDataset);   // layout (gaiolas e colaboradores)
 const beltPadrao = { h: 840, v: 680 };
-let beltState = carregarLS(STORAGE_KEY_BELT, beltPadrao);
+
+// Se o navegador só guardou o layout padrão ANTIGO (ninguém mexeu de verdade), ele é descartado
+// e vale o padrão novo. Um layout que você realmente arrumou é mantido.
+const ASSINATURA_PADRAO_ANTIGO = "cage-10|cage|330|180|0|SDA -PA|724-08;cage-11|cage|330|260|0|F JCD-PA|724-12;cage-12|cage|330|340|0|F TLA-PA|744-00;cage-13|cage|330|420|0|F-BBC-PA|996-00;cage-14|cage|330|500|0|F TUR-PA|724-03;cage-15|cage|330|580|0|TCI-PA|951-00;cage-16|cage|330|660|0|F GNS-PA|750-00;cage-17|cage|330|735|90|NRE -PA|735-00;cage-18|cage|395|735|90|F ITI-PA|720-00;cage-19|cage|460|735|90|F NMB-PA|767-00;cage-1|cage|180|100|0|MDL-PA|831-00;cage-20|cage|525|735|90|CDJ|775-00;cage-21|cage|590|735|90|MRB-02|681-00;cage-22|cage|655|735|90|BNV-PA|675-00;cage-23|cage|330|915|90|F RDC -PA|724-19;cage-24|cage|395|915|90|F SFX-PA|724-20;cage-25|cage|460|915|90|F ORL-PA|724-10;cage-26|cage|525|915|90|F XIG 02-PA|724-07;cage-27|cage|590|915|90|F CNA-PA|740-00;cage-28|cage|655|915|90|CNA-PA|691-00;cage-29|cage|180|750|0|CKS -PA|724-01;cage-2|cage|180|180|0|ATM 02-PA|837-00;cage-30|cage|180|830|0|F ELD-PA|742-00;cage-31|cage|180|910|0|CDA -PA|728-00;cage-32|cage|245|915|90|AUG -TO|724-14;cage-33|cage|30|700|0|F TCP-TO|777-00;cage-34|cage|30|780|0|F AGT-TO|767-00;cage-35|cage|30|860|0|TCM-PA|953-00;cage-36|cage|85|780|0|SGA-PA|887-15;cage-37|cage|85|860|0|EXTRA-PA|000-00;cage-3|cage|180|260|0|ATM -PA|719-00;cage-4|cage|180|340|0|F-ANP-PA|966-00;cage-5|cage|180|420|0|F PCA-PA|730-00;cage-6|cage|180|500|0|F DOM -PA|736-00;cage-7|cage|180|580|0|RON-PA|759-20;cage-8|cage|180|660|0|AMP -PA|724-16;cage-9|cage|330|100|0|NMB -PA|724-06;worker-1|worker|125|180|0|F1|;worker-2|worker|125|360|0|F2|;worker-3|worker|125|540|0|F3|;worker-4|worker|360|930|90|F4|;worker-5|worker|500|930|90|F5|;worker-6|worker|620|930|90|F6|";
+function assinaturaLayout(lista) {
+  return lista.map((i) => [i.id, i.type, Math.round(i.top), Math.round(i.left), Math.round(i.rot || 0), i.role || i.base || "", i.seg || ""].join("|")).sort().join(";");
+}
+function carregarLayoutInicial() {
+  const salvo = carregarLS(STORAGE_KEY_LAYOUT, null);
+  const salvoBelt = carregarLS(STORAGE_KEY_BELT, null);
+  const antigoSemUso = Array.isArray(salvo) && assinaturaLayout(salvo) === ASSINATURA_PADRAO_ANTIGO;
+  if (Array.isArray(salvo) && !antigoSemUso) {
+    return { state: salvo, belt: salvoBelt || { ...beltPadrao } };   // arrumação própria: mantém
+  }
+  if (antigoSemUso) {
+    try { localStorage.removeItem(STORAGE_KEY_LAYOUT); } catch (e) {}
+    const beltAntigo = salvoBelt && salvoBelt.h === 720 && salvoBelt.v === 360;
+    if (beltAntigo) { try { localStorage.removeItem(STORAGE_KEY_BELT); } catch (e) {} }
+    return { state: clone(defaultDataset), belt: beltAntigo || !salvoBelt ? { ...beltPadrao } : salvoBelt };
+  }
+  return { state: clone(defaultDataset), belt: salvoBelt || { ...beltPadrao } };
+}
+const layoutInicial = carregarLayoutInicial();
+let state = layoutInicial.state;   // layout (gaiolas e colaboradores)
+let beltState = layoutInicial.belt;
 let ajustesDia = carregarLS(STORAGE_KEY_AJUSTES, {});   // { "AAAA-MM-DD": { nome: posição } }
 let diaristasPorData = carregarLS(STORAGE_KEY_DIARISTAS, {});   // { "AAAA-MM-DD": ["DIARISTA 1", ...] }
 (function podarAjustes() {
@@ -1366,9 +1396,11 @@ document.addEventListener("mousedown", (e) => {
   if (movable) {
     movable.classList.add("selected");
     activeEl = movable;
-    const canvasRect = document.getElementById("canvas").getBoundingClientRect();
-    dragOffset.x = e.clientX - canvasRect.left - (parseFloat(movable.style.left) || 0);
-    dragOffset.y = e.clientY - canvasRect.top - (parseFloat(movable.style.top) || 0);
+    const canvasEl = document.getElementById("canvas");
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const sc = canvasRect.width / canvasEl.offsetWidth || 1;
+    dragOffset.x = (e.clientX - canvasRect.left) / sc - (parseFloat(movable.style.left) || 0);
+    dragOffset.y = (e.clientY - canvasRect.top) / sc - (parseFloat(movable.style.top) || 0);
     movable.style.zIndex = 1000;
   }
 });
@@ -1381,11 +1413,13 @@ document.addEventListener("mousemove", (e) => {
     return;
   }
   if (activeEl && !isRotating) {
-    const canvasRect = document.getElementById("canvas").getBoundingClientRect();
-    let x = e.clientX - canvasRect.left - dragOffset.x;
-    let y = e.clientY - canvasRect.top - dragOffset.y;
-    x = Math.max(0, Math.min(x, canvasRect.width - activeEl.offsetWidth));
-    y = Math.max(0, Math.min(y, canvasRect.height - activeEl.offsetHeight));
+    const canvasEl = document.getElementById("canvas");
+    const canvasRect = canvasEl.getBoundingClientRect();
+    const sc = canvasRect.width / canvasEl.offsetWidth || 1;
+    let x = (e.clientX - canvasRect.left) / sc - dragOffset.x;
+    let y = (e.clientY - canvasRect.top) / sc - dragOffset.y;
+    x = Math.max(0, Math.min(x, canvasEl.offsetWidth - activeEl.offsetWidth));
+    y = Math.max(0, Math.min(y, canvasEl.offsetHeight - activeEl.offsetHeight));
     activeEl.style.left = `${x}px`;
     activeEl.style.top = `${y}px`;
     const entry = state.find((i) => i.id === activeEl.id);
@@ -1509,6 +1543,48 @@ function renderizarTudo() {
   gerarEscala();
 }
 
+/* ---- painel responsivo: escala o painel inteiro para a janela ---- */
+function modoZoomAtual() {
+  try {
+    const m = localStorage.getItem("jt_modo_zoom");
+    if (m) return m;
+  } catch (e) {}
+  return window.innerWidth < 900 ? "100" : "largura";
+}
+function ajustarEscalaTela() {
+  const scroll = document.getElementById("board-scroll");
+  const board = document.getElementById("board");
+  const modo = modoZoomAtual();
+  const larg = board.offsetWidth, alt = board.offsetHeight;
+  let k = 1;
+  if (modo !== "100") {
+    const kL = (scroll.clientWidth - 24) / larg;
+    const kA = (window.innerHeight - 16) / alt;
+    k = modo === "tela" ? Math.min(kL, kA) : kL;
+    k = Math.max(0.25, Math.min(k, 2.5));
+  }
+  board.style.transformOrigin = "0 0";
+  if (modo === "100") board.style.margin = "0 auto";
+  else {
+    board.style.margin = "0";
+    board.style.marginLeft = `${Math.max(0, ((scroll.clientWidth - 24) - larg * k) / 2)}px`;
+  }
+  board.style.transform = Math.abs(k - 1) < 0.001 ? "" : `scale(${k})`;
+  scroll.style.overflowX = modo === "100" ? "auto" : "hidden";
+  scroll.style.height = modo === "100" ? "" : `${Math.ceil(alt * k) + 12}px`;
+}
+document.getElementById("modoZoom").value = modoZoomAtual();
+document.getElementById("modoZoom").addEventListener("change", (e) => {
+  try { localStorage.setItem("jt_modo_zoom", e.target.value); } catch (err) {}
+  ajustarEscalaTela();
+});
+window.addEventListener("resize", ajustarEscalaTela);
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(() => ajustarEscalaTela());
+  ro.observe(document.getElementById("board"));
+  ro.observe(document.getElementById("board-scroll"));
+}
+
 window.addEventListener("beforeprint", () => {
   const b = document.getElementById("board");
   b.style.zoom = "";
@@ -1525,6 +1601,7 @@ window.addEventListener("DOMContentLoaded", () => {
   initPackages();
   atualizarBadgeAuto();
   renderizarTudo();
+  ajustarEscalaTela();
 });
 </script>
 </body>
