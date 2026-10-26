@@ -79,7 +79,7 @@
 
   /* ===== LAYOUT DA ESTEIRA ===== */
   #canvas-wrapper {
-    width: 1120px; height: 720px; background: #fff; border: 2px solid #cbd5e1; border-radius: 8px;
+    width: 1120px; height: auto; min-height: 720px; background: #fff; border: 2px solid #cbd5e1; border-radius: 8px;
     position: relative; overflow: auto;
   }
   #canvas { width: 100%; height: 100%; position: relative; min-width: 1120px; min-height: 720px; }
@@ -152,7 +152,7 @@
     body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .no-print, .delete-btn, .rotate-handle, .color-picker, .package, tr.drop-extra, tr.so-tela, .vaga-txt { display: none !important; }
     #board-scroll { overflow: visible; padding: 0; }
-    #board { zoom: 0.68; border: none; margin: 0; }
+    #board { zoom: 0.58; border: none; margin: 0; }
     #canvas-wrapper { overflow: visible; border: none; }
   }
 </style>
@@ -417,49 +417,51 @@ const segmentPool = [
 ];
 
 const defaultDataset = [
-  { id: "worker-1", type: "worker", top: 125, left: 180, rot: 0, role: "F1", name: "Operador 1", icon: "👩" },
-  { id: "worker-2", type: "worker", top: 125, left: 360, rot: 0, role: "F2", name: "Operador 2", icon: "🧑" },
-  { id: "worker-3", type: "worker", top: 125, left: 540, rot: 0, role: "F3", name: "Operador 3", icon: "👨" },
-  { id: "worker-4", type: "worker", top: 360, left: 930, rot: 90, role: "F4", name: "Operador 4", icon: "👩" },
-  { id: "worker-5", type: "worker", top: 500, left: 930, rot: 90, role: "F5", name: "Operador 5", icon: "🧑" },
-  { id: "worker-6", type: "worker", top: 620, left: 930, rot: 90, role: "F6", name: "Operador 6", icon: "👨" },
-  { id: "cage-1", type: "cage", top: 180, left: 100, rot: 0, base: "MDL-PA", seg: "831-00", bg: "#ffffff" },
-  { id: "cage-2", type: "cage", top: 180, left: 180, rot: 0, base: "ATM 02-PA", seg: "837-00", bg: "#ffffff" },
-  { id: "cage-3", type: "cage", top: 180, left: 260, rot: 0, base: "ATM -PA", seg: "719-00", bg: "#ffffff" },
-  { id: "cage-4", type: "cage", top: 180, left: 340, rot: 0, base: "F-ANP-PA", seg: "966-00", bg: "#ffffff" },
-  { id: "cage-5", type: "cage", top: 180, left: 420, rot: 0, base: "F PCA-PA", seg: "730-00", bg: "#ffffff" },
-  { id: "cage-6", type: "cage", top: 180, left: 500, rot: 0, base: "F DOM -PA", seg: "736-00", bg: "#ffffff" },
-  { id: "cage-7", type: "cage", top: 180, left: 580, rot: 0, base: "RON-PA", seg: "759-20", bg: "#ffffff" },
-  { id: "cage-8", type: "cage", top: 180, left: 660, rot: 0, base: "AMP -PA", seg: "724-16", bg: "#ffffff" },
-  { id: "cage-9", type: "cage", top: 330, left: 100, rot: 0, base: "NMB -PA", seg: "724-06", bg: "#ffffff" },
-  { id: "cage-10", type: "cage", top: 330, left: 180, rot: 0, base: "SDA -PA", seg: "724-08", bg: "#ffffff" },
-  { id: "cage-11", type: "cage", top: 330, left: 260, rot: 0, base: "F JCD-PA", seg: "724-12", bg: "#ffffff" },
-  { id: "cage-12", type: "cage", top: 330, left: 340, rot: 0, base: "F TLA-PA", seg: "744-00", bg: "#ffffff" },
-  { id: "cage-13", type: "cage", top: 330, left: 420, rot: 0, base: "F-BBC-PA", seg: "996-00", bg: "#ffffff" },
-  { id: "cage-14", type: "cage", top: 330, left: 500, rot: 0, base: "F TUR-PA", seg: "724-03", bg: "#ffffff" },
-  { id: "cage-15", type: "cage", top: 330, left: 580, rot: 0, base: "TCI-PA", seg: "951-00", bg: "#ffffff" },
-  { id: "cage-16", type: "cage", top: 330, left: 660, rot: 0, base: "F GNS-PA", seg: "750-00", bg: "#ffffff" },
-  { id: "cage-17", type: "cage", top: 330, left: 735, rot: 90, base: "NRE -PA", seg: "735-00", bg: "#ffffff" },
-  { id: "cage-18", type: "cage", top: 395, left: 735, rot: 90, base: "F ITI-PA", seg: "720-00", bg: "#ffffff" },
-  { id: "cage-19", type: "cage", top: 460, left: 735, rot: 90, base: "F NMB-PA", seg: "767-00", bg: "#ffffff" },
-  { id: "cage-20", type: "cage", top: 525, left: 735, rot: 90, base: "CDJ", seg: "775-00", bg: "#ffffff" },
-  { id: "cage-21", type: "cage", top: 590, left: 735, rot: 90, base: "MRB-02", seg: "681-00", bg: "#ffffff" },
-  { id: "cage-22", type: "cage", top: 655, left: 735, rot: 90, base: "BNV-PA", seg: "675-00", bg: "#ffffff" },
-  { id: "cage-23", type: "cage", top: 330, left: 915, rot: 90, base: "F RDC -PA", seg: "724-19", bg: "#ffffff" },
-  { id: "cage-24", type: "cage", top: 395, left: 915, rot: 90, base: "F SFX-PA", seg: "724-20", bg: "#ffffff" },
-  { id: "cage-25", type: "cage", top: 460, left: 915, rot: 90, base: "F ORL-PA", seg: "724-10", bg: "#ffffff" },
-  { id: "cage-26", type: "cage", top: 525, left: 915, rot: 90, base: "F XIG 02-PA", seg: "724-07", bg: "#ffffff" },
-  { id: "cage-27", type: "cage", top: 590, left: 915, rot: 90, base: "F CNA-PA", seg: "740-00", bg: "#ffffff" },
-  { id: "cage-28", type: "cage", top: 655, left: 915, rot: 90, base: "CNA-PA", seg: "691-00", bg: "#ffffff" },
-  { id: "cage-29", type: "cage", top: 180, left: 750, rot: 0, base: "CKS -PA", seg: "724-01", bg: "#ffffff" },
-  { id: "cage-30", type: "cage", top: 180, left: 830, rot: 0, base: "F ELD-PA", seg: "742-00", bg: "#ffffff" },
-  { id: "cage-31", type: "cage", top: 180, left: 910, rot: 0, base: "CDA -PA", seg: "728-00", bg: "#ffffff" },
-  { id: "cage-32", type: "cage", top: 245, left: 915, rot: 90, base: "AUG -TO", seg: "724-14", bg: "#ffffff" },
-  { id: "cage-33", type: "cage", top: 30, left: 700, rot: 0, base: "F TCP-TO", seg: "777-00", bg: "#ffffff" },
-  { id: "cage-34", type: "cage", top: 30, left: 780, rot: 0, base: "F AGT-TO", seg: "767-00", bg: "#ffffff" },
-  { id: "cage-35", type: "cage", top: 30, left: 860, rot: 0, base: "TCM-PA", seg: "953-00", bg: "#ffffff" },
-  { id: "cage-36", type: "cage", top: 85, left: 780, rot: 0, base: "SGA-PA", seg: "887-15", bg: "#ffffff" },
-  { id: "cage-37", type: "cage", top: 85, left: 860, rot: 0, base: "EXTRA-PA", seg: "000-00", bg: "#ffffff" },
+  { id: "worker-1", type: "worker", top: 297, left: 185, rot: 0, role: "F1", name: "Operador 1", icon: "👩" },
+  { id: "worker-2", type: "worker", top: 303, left: 383, rot: 0, role: "F2", name: "Operador 2", icon: "🧑" },
+  { id: "worker-3", type: "worker", top: 304, left: 598, rot: 0, role: "F3", name: "Operador 3", icon: "👨" },
+  { id: "worker-4", type: "worker", top: 304, left: 760, rot: 0, role: "F4", name: "Operador 4", icon: "👩" },
+  { id: "worker-5", type: "worker", top: 410, left: 889, rot: 90, role: "F5", name: "Operador 5", icon: "🧑" },
+  { id: "worker-6", type: "worker", top: 591, left: 893, rot: 90, role: "F6", name: "Operador 6", icon: "👨" },
+  { id: "worker-7", type: "worker", top: 770, left: 884, rot: 92, role: "F7", name: "Operador 7", icon: "👤" },
+  { id: "cage-1", type: "cage", top: 174, left: 115, rot: -0.1, base: "MDL-PA", seg: "831-00", bg: "#ffffff" },
+  { id: "cage-2", type: "cage", top: 176, left: 202, rot: 0.0, base: "AMP -PA", seg: "724-16", bg: "#ffffff" },
+  { id: "cage-3", type: "cage", top: 175, left: 283, rot: 2.2, base: "NRE -PA", seg: "735-00", bg: "#ffffff" },
+  { id: "cage-4", type: "cage", top: 177, left: 366, rot: -0.0, base: "SDA -PA", seg: "724-08", bg: "#ffffff" },
+  { id: "cage-5", type: "cage", top: 177, left: 452, rot: 0.0, base: "F JCD-PA", seg: "724-12", bg: "#ffffff" },
+  { id: "cage-6", type: "cage", top: 177, left: 534, rot: 0.0, base: "F TUR-PA", seg: "724-03", bg: "#ffffff" },
+  { id: "cage-7", type: "cage", top: 177, left: 616, rot: 0.0, base: "F NMB-PA", seg: "767-00", bg: "#ffffff" },
+  { id: "cage-8", type: "cage", top: 178, left: 699, rot: 0.0, base: "ATM -PA", seg: "719-00", bg: "#ffffff" },
+  { id: "cage-9", type: "cage", top: 179, left: 782, rot: 0.0, base: "TCI-PA", seg: "951-00", bg: "#ffffff" },
+  { id: "cage-10", type: "cage", top: 178, left: 863, rot: 0.0, base: "ATM 02-PA", seg: "837-00", bg: "#ffffff" },
+  { id: "cage-11", type: "cage", top: 177, left: 945, rot: -0.1, base: "EXTRA-PA", seg: "000-00", bg: "#ffffff" },
+  { id: "cage-12", type: "cage", top: 190, left: 1020, rot: 90.7, base: "SGA-PA", seg: "887-15", bg: "#ffffff" },
+  { id: "cage-13", type: "cage", top: 269, left: 1020, rot: 89.9, base: "F ITI-PA", seg: "720-00", bg: "#ffffff" },
+  { id: "cage-14", type: "cage", top: 347, left: 1021, rot: 90.0, base: "F-PCA", seg: "730-00", bg: "#ffffff" },
+  { id: "cage-15", type: "cage", top: 425, left: 1021, rot: 90.0, base: "F DOM -PA", seg: "736-00", bg: "#ffffff" },
+  { id: "cage-16", type: "cage", top: 504, left: 1021, rot: 90.7, base: "F GNS-PA", seg: "750-00", bg: "#ffffff" },
+  { id: "cage-17", type: "cage", top: 584, left: 1019, rot: 90.7, base: "NMB -PA", seg: "724-06", bg: "#ffffff" },
+  { id: "cage-18", type: "cage", top: 663, left: 1019, rot: 89.3, base: "CDJ", seg: "775-00", bg: "#ffffff" },
+  { id: "cage-19", type: "cage", top: 743, left: 1021, rot: 90.5, base: "BNV-PA", seg: "675-00", bg: "#ffffff" },
+  { id: "cage-20", type: "cage", top: 822, left: 1023, rot: 91.6, base: "MRB-02-PA", seg: "681-00", bg: "#ffffff" },
+  { id: "cage-21", type: "cage", top: 901, left: 1022, rot: 89.0, base: "F-BBC-PA", seg: "996-00", bg: "#ffffff" },
+  { id: "cage-22", type: "cage", top: 992, left: 1030, rot: 90.0, base: "CDA -PA", seg: "728-00", bg: "#ffffff" },
+  { id: "cage-23", type: "cage", top: 402, left: 100, rot: 1.4, base: "F TCP-TO", seg: "777-00", bg: "#ffffff" },
+  { id: "cage-24", type: "cage", top: 402, left: 183, rot: 1.4, base: "AUG -TO", seg: "724-14", bg: "#ffffff" },
+  { id: "cage-25", type: "cage", top: 402, left: 262, rot: 2.2, base: "F CNA-PA", seg: "740-00", bg: "#ffffff" },
+  { id: "cage-26", type: "cage", top: 402, left: 343, rot: 1.4, base: "F RDC -PA", seg: "724-19", bg: "#ffffff" },
+  { id: "cage-27", type: "cage", top: 403, left: 422, rot: 1.2, base: "F SFX-PA", seg: "724-20", bg: "#ffffff" },
+  { id: "cage-28", type: "cage", top: 404, left: 501, rot: 0.0, base: "CKS -PA", seg: "724-01", bg: "#ffffff" },
+  { id: "cage-29", type: "cage", top: 403, left: 580, rot: -0.1, base: "F XIG 02-PA", seg: "724-07", bg: "#ffffff" },
+  { id: "cage-30", type: "cage", top: 402, left: 659, rot: 1.9, base: "F ELD-PA", seg: "742-00", bg: "#ffffff" },
+  { id: "cage-31", type: "cage", top: 402, left: 739, rot: 1.5, base: "F ORL-PA", seg: "724-10", bg: "#ffffff" },
+  { id: "cage-32", type: "cage", top: 462, left: 799, rot: 89.9, base: "RON-PA", seg: "759-20", bg: "#ffffff" },
+  { id: "cage-33", type: "cage", top: 540, left: 799, rot: 89.9, base: "F-AGT-TO", seg: "776-00", bg: "#ffffff" },
+  { id: "cage-34", type: "cage", top: 618, left: 802, rot: 91.5, base: "TCM-PA", seg: "034-00", bg: "#ffffff" },
+  { id: "cage-35", type: "cage", top: 696, left: 806, rot: 91.5, base: "F-ANP-PA", seg: "966-00", bg: "#ffffff" },
+  { id: "cage-36", type: "cage", top: 773, left: 806, rot: 91.4, base: "F TLA-PA", seg: "744-00", bg: "#ffffff" },
+  { id: "cage-37", type: "cage", top: 854, left: 805, rot: 90.8, base: "CNA-PA", seg: "691-00", bg: "#ffffff" },
+  { id: "cage-38", type: "cage", top: 932, left: 805, rot: 89.9, base: "027", seg: "00", bg: "#ffffff" }
 ];
 
 /* =====================================================================
@@ -479,7 +481,8 @@ let posicoesRotativas = carregarLS(STORAGE_KEY_POS, posicoesPadrao);
 let atribuicoesManuais = carregarLS(STORAGE_KEY_ATRIB, []);
 let folgasDomingo = carregarLS(STORAGE_KEY_FOLGA_DOM, []);
 let state = carregarLS(STORAGE_KEY_LAYOUT, defaultDataset);   // layout (gaiolas e colaboradores)
-let beltState = carregarLS(STORAGE_KEY_BELT, { h: 720, v: 360 });
+const beltPadrao = { h: 840, v: 680 };
+let beltState = carregarLS(STORAGE_KEY_BELT, beltPadrao);
 let ajustesDia = carregarLS(STORAGE_KEY_AJUSTES, {});   // { "AAAA-MM-DD": { nome: posição } }
 let diaristasPorData = carregarLS(STORAGE_KEY_DIARISTAS, {});   // { "AAAA-MM-DD": ["DIARISTA 1", ...] }
 (function podarAjustes() {
@@ -1310,7 +1313,7 @@ function updateBeltUI() {
   v.style.height = `${beltState.v}px`;
   system.style.width = `${beltState.h + 100}px`;
   system.style.height = `${beltState.v + 80}px`;
-  canvas.style.minWidth = `${Math.max(1120, beltState.h + 300)}px`;
+  canvas.style.minWidth = `${Math.max(1100, beltState.h + 240)}px`;
   canvas.style.minHeight = `${Math.max(720, beltState.v + 400)}px`;
   const pathStr = `path("M 0 40 L ${beltState.h + 40} 40 L ${beltState.h + 40} ${beltState.v + 80}")`;
   document.querySelectorAll(".package").forEach((pkg) => (pkg.style.offsetPath = pathStr));
@@ -1466,7 +1469,7 @@ function importarLayout() {
       const o = JSON.parse(txt);
       if (!Array.isArray(o.state)) throw new Error("formato");
       state = o.state;
-      beltState = o.belt || { h: 720, v: 360 };
+      beltState = o.belt || { ...beltPadrao };
       salvarLS(STORAGE_KEY_LAYOUT, state);
       salvarLS(STORAGE_KEY_BELT, beltState);
       updateBeltUI();
@@ -1483,7 +1486,7 @@ function resetLayout() {
   localStorage.removeItem(STORAGE_KEY_LAYOUT);
   localStorage.removeItem(STORAGE_KEY_BELT);
   state = clone(defaultDataset);
-  beltState = { h: 720, v: 360 };
+  beltState = { ...beltPadrao };
   updateBeltUI();
   renderLayout();
   renderizarPainelDireita();
@@ -1505,6 +1508,14 @@ function renderizarTudo() {
   renderizarConfig();
   gerarEscala();
 }
+
+window.addEventListener("beforeprint", () => {
+  const b = document.getElementById("board");
+  b.style.zoom = "";
+  const z = Math.min(1070 / b.offsetWidth, 735 / b.offsetHeight, 1);
+  b.style.zoom = String(Math.max(0.3, z));
+});
+window.addEventListener("afterprint", () => { document.getElementById("board").style.zoom = ""; });
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("dataEscala").value = hojeISO();
